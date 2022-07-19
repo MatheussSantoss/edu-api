@@ -4,6 +4,7 @@ module.exports = {
     connection: {
       filename: 'development.sqlite3'
     },
+    useNullAsDefault: true,
     pool: {
       afterCreate: function(connection, cb) {
         connection.run('PRAGMA foreign_keys = ON', cb);

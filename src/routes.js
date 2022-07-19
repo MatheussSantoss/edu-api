@@ -9,10 +9,14 @@ const LessonsController = require('./controllers/LessonsController');
 
 routes.get('/', IndexController.index);
 
+//  Rotas de Cursos
+routes.get('/courses', CoursesController.find);
 routes.post('/courses', CoursesController.create);
 
+//  Rotas de Professores
 routes.post('/instructors', InstructorsController.create);
 
+//  Rotas de Aulas
 routes.post('/lessons', LessonsController.create);
 
 module.exports = routes;
