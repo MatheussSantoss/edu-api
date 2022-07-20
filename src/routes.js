@@ -21,6 +21,8 @@ routes.post('/instructors', InstructorsController.create);
 //  Rotas de Aulas
 routes.post('/lessons', LessonsController.create);
 
+routes.get('lessons/:id', LessonsController.findById);
+
 module.exports = routes;
 
 // lessons

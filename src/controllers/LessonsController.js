@@ -77,3 +77,20 @@ exports.create = async (req, res) => {
     return res.status(500).send({ error: e.message || e });
   }
 }
+
+exports.findById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const lesson = await knex.select('*').from('lessons').where({id}).first();
+  
+    const instructors = await knex.select('*').from('instructors').where({professorId: id});
+  
+    return res.status(200).send({
+      ...lesson,
+      instructors
+    })
+  } catch (e) {
+    return res.status(500).send({ error: e.message || e });
+  }
+
+}
