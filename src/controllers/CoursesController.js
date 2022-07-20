@@ -36,3 +36,25 @@ exports.create = async (req, res) => {
     return res.status(500).send({ error: e.message || e });
   }
 }
+
+exports.findById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const course = await knex.select('*').from('courses').where({id}).first();
+    
+    if (!course) {
+      return res.status(404).send({
+        status: `Curso com o ID: ${id} não foi encontrado`
+      });
+    };
+
+    const lessons = await knex.select('*').from('lessons').where({courseId: id});
+
+    return res.status(200).send({
+      ...course, // Os três pontos (...) pegam todos os atributos do objeto
+      lessons
+    });
+  } catch (e) {
+    return res.status(500).send({ error: e.message || e });
+  }
+}

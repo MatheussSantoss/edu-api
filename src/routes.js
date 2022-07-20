@@ -13,6 +13,8 @@ routes.get('/', IndexController.index);
 routes.get('/courses', CoursesController.find);
 routes.post('/courses', CoursesController.create);
 
+routes.get('/courses/:id', CoursesController.findById);
+
 //  Rotas de Professores
 routes.post('/instructors', InstructorsController.create);
 
