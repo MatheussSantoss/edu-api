@@ -1,16 +1,6 @@
 const knex = require('../databases/knex');
 const fieldValidator = require('../utils/FieldValidator');
 
-exports.find = async (req, res) => {
-  try {
-    const courses = await knex.select('*').from('courses');
-
-    return res.status(200).send(courses);
-  } catch (e) {
-    return res.status(500).send({error: e.message || e});
-  }
-}
-
 exports.create = async (req, res) => {
   try {
     const course = req.body;
@@ -35,26 +25,66 @@ exports.create = async (req, res) => {
   } catch (e) {
     return res.status(500).send({ error: e.message || e });
   }
-}
+};
+
+exports.find = async (req, res) => {
+  try {
+    const courses = await knex.select('*').from('courses');
+    return res.status(200).send(courses);
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};
 
 exports.findById = async (req, res) => {
   try {
-    const id = req.params.id;
+    const {id} = req.params.id;
     const course = await knex.select('*').from('courses').where({id}).first();
-    
-    if (!course) {
-      return res.status(404).send({
-        status: `Curso com o ID: ${id} não foi encontrado`
-      });
-    };
+    if(!course) {
+      return res.status(404).send({ status: `Curso com id ${id} não foi encontrado` });
+    }
 
     const lessons = await knex.select('*').from('lessons').where({courseId: id});
-
     return res.status(200).send({
-      ...course, // Os três pontos (...) pegam todos os atributos do objeto
+      ...course,// "..." pega todos os atributos
       lessons
     });
   } catch (e) {
-    return res.status(500).send({ error: e.message || e });
+    return res.status(500).send({ error: e?.message || e });
   }
-}
+};
+
+exports.update = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const newCourse = req.body;
+    const course = await knex.select(['id']).from('courses').where({id}).first();
+
+    if(!course) {
+      return res.status(404).send({
+        status: `Nenhum curso com o id ${id} foi encontrado`
+      })
+    }
+
+    await knex.update(newCourse).from('courses').where({id});
+    const courseUpdated = await knex.select('*').from('courses').where({id}).first();
+    return res.status(200).send(courseUpdated)
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const [course] = await knex.select('*').from('courses').where({id}).first(); 
+
+    if(!course) {
+      return res.status(404).send(`O curso com id: ${id} não existe`);
+    }
+    await knex.delete({title: course.title}).from('courses').where({id});
+    return res.status(203).send({ status:'Curso deletado com sucesso', data: course});
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};

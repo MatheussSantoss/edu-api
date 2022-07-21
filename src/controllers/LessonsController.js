@@ -76,21 +76,76 @@ exports.create = async (req, res) => {
   } catch (e) {
     return res.status(500).send({ error: e.message || e });
   }
-}
+};
+
+exports.find = async (req, res) => {
+  try {
+    const courses = await knex.select('*').from('lessons');
+    return res.status(200).send(courses);
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};
+
 
 exports.findById = async (req, res) => {
   try {
     const id = req.params.id;
     const lesson = await knex.select('*').from('lessons').where({id}).first();
-  
-    const instructors = await knex.select('*').from('instructors').where({professorId: id});
-  
+    if(!lesson) {
+      return res.status(404).send({ status: `Aula com id ${id} não foi encontrada` });
+    }
+
+    const [instructor] = await knex.select('*').from('instructors').where({id: lesson.instructorId});
+    delete instructor.id;
+
+    delete lesson.instructorId;
+    delete lesson.courseId;
+
+    // define um avatar padrão se não existir
+    if(!instructor.avatarUrl) {
+      instructor.avatarUrl = 'https://avatars.dicebear.com/api/bottts/your-custom-seed.svg'
+    }
     return res.status(200).send({
       ...lesson,
-      instructors
-    })
+      instructor
+    });
   } catch (e) {
-    return res.status(500).send({ error: e.message || e });
+    return res.status(500).send({ error: e?.message || e });
   }
+};
 
-}
+exports.update = async(req, res) => {
+  try {
+    const {id} = req.params;
+    const newLesson = req.body;
+    const lesson = await knex.select(['id']).from('lessons').where({id}).first();
+
+    if(!lesson) {
+      return res.status(404).send({
+        status: `Nenhuma aula com o id ${id} foi encontrado`
+      })
+    };
+
+    await knex.update(newLesson).from('lessons').where({id});
+    const lessonUpdated = await knex.select('*').from('lessons').where({id}).first();
+    return res.status(200).send(lessonUpdated);
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const [lesson] = await knex.select('*').from('lessons').where({id}).first(); 
+
+    if(!lesson) {
+      return res.status(404).send(`A aula com id: ${id} não existe`);
+    }
+    await knex.delete({title: lesson.title}).from('lessons').where({id: lesson.id});
+    return res.status(203).send({ status:'Aula deletada com sucesso', data: lesson});
+  } catch (e) {
+    return res.status(500).send({ error: e?.message || e });
+  }
+};
