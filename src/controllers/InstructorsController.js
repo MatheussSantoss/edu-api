@@ -37,13 +37,12 @@ exports.find = async (req, res) => {
 
 exports.findById = async (req, res) => {
   try {
-    const {id} = req.params.id;
+    const {id} = req.params;
     const instructor = await knex.select('*').from('instructors').where({id}).first();
     if(!instructor) {
       return res.status(404).send({ status: `Professor com id ${id} não foi encontrado` });
     }
 
-    const instructors = await knex.select('*').from('instructors').where({id});
     return res.status(200).send({
       ...instructor
     });
@@ -76,7 +75,7 @@ exports.update = async(req, res) => {
 exports.delete = async (req, res) => {
   try {
     const {id} = req.params;
-    const [instructor] = await knex.select('*').from('instructors').where({id}).first(); 
+    const instructor = await knex.select('id').from('instructors').where({id}).first(); 
 
     if(!instructor) {
       return res.status(404).send(`O curso com id: ${id} não existe`);

@@ -77,7 +77,7 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const {id} = req.params;
-    const [course] = await knex.select('*').from('courses').where({id}).first(); 
+    const [course] = await knex.select('id').from('courses').where({id}).first(); 
 
     if(!course) {
       return res.status(404).send(`O curso com id: ${id} não existe`);
